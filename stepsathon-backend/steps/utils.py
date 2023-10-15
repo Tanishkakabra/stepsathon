@@ -1,6 +1,7 @@
 import qrcode
 from io import BytesIO
 from django.utils import timezone
+#someway to import the database, i forgot how to work in sql lol. imma assume db = database
 
 def generate_qr_code(event, user):
     # Combine event information, user details, and a timestamp
@@ -26,3 +27,33 @@ def generate_qr_code(event, user):
     buffer.close()
 
     return qr_image_data
+
+
+def login_valid(user):
+    # Check if the user is already logged in
+    if user.is_authenticated:
+        return False, "You are already logged in"
+    if user.username not in db.username:
+        return False, "No such user exists"
+    #check if password matches, if not:
+        return False, "Incorrect Password"
+    #check if IMEI matches, if not:
+        return False, "Login from original device please"
+
+    # Check if the user is registered for the event
+    # if not event.users.filter(pk=user.pk).exists():
+    #     return False, "You are not registered for this event"
+
+    # # Check if the user is registered for the event
+    # if event.users.filter(pk=user.pk).first().attended:
+    #     return False, "You have already attended this event"
+
+    return True, "Login Successful!!"
+
+def register_user(name, password, IMEI):
+    user = CustomUser(name=name, password=password, IMEI=IMEI)
+    if user.name in db.username:
+        return False, "username already exists"
+    #push this information in the database
+    #also find a way to extract IMEI lmao, not sure if backend can extract IMEI or frontend
+    return True, "Created a new user"

@@ -35,3 +35,13 @@ class BuyTicket(APIView):
         ticket.save()
 
         return Response({'message': 'Ticket purchased successfully'}, status=status.HTTP_201_CREATED)
+    
+
+@api_view(['POST'])
+def user_login(request):
+    result, message = login_valid(request)
+    if result:
+        #set IsAuthenticated to true, whatever it is
+        return message #status = 200 i believe
+    else:
+        return message #, status = "400" something error i think?
