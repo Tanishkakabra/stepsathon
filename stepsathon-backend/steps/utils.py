@@ -1,6 +1,23 @@
-import qrcode
+"""Module Containing helper functions for the app."""
 from io import BytesIO
 from django.utils import timezone
+from cryptography.fernet import Fernet
+
+
+def encrypt_user_event(user, event):
+    user_email = user.email
+    encryption_key = event.encryption_key
+    event_uuid = event.uuid
+    msg = event_uuid + user_email
+    encrypted_msg = encryption_key.encrypt(msg)
+
+    return encrypted_msg
+
+
+
+
+"""
+
 #someway to import the database, i forgot how to work in sql lol. imma assume db = database
 
 def generate_qr_code(event, user):
@@ -57,3 +74,8 @@ def register_user(name, password, IMEI):
     #push this information in the database
     #also find a way to extract IMEI lmao, not sure if backend can extract IMEI or frontend
     return True, "Created a new user"
+
+
+
+    
+"""

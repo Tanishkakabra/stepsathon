@@ -1,14 +1,29 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Event, Ticket
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-from .utils import generate_qr_code
+
+from steps.serializers import EventsMiniSerialzers
+from steps.utils import encrypt_user_event
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_events(request):
+    user = request.user
+    events = user.events.all()
+    if events is not None:
+        final_data = []
+        for event in events:
+            encrypted_ticket = encrypt_user_event(user, event)
+            data = EventsMiniSerialzers(data=event, context={'request': request}).data
+            data['encrypted_ticket'] = encrypted_ticket
+            final_data.append(data)
+        return Response(data=data, status=status.HTTP_200_OK)
+    return Response(data={"detail":"You do not  have any registered events"})
 
-
+"""
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -45,3 +60,7 @@ def user_login(request):
         return message #status = 200 i believe
     else:
         return message #, status = "400" something error i think?
+    
+
+
+"""
