@@ -7,8 +7,9 @@ from cryptography.fernet import Fernet
 def encrypt_user_event(user, event):
     user_email = user.email
     encryption_key = event.encryption_key
+    user_imei = user.imei
     event_uuid = event.uuid
-    msg = event_uuid + user_email
+    msg = event_uuid + user_email + user_imei
     encrypted_msg = encryption_key.encrypt(msg)
 
     return encrypted_msg
@@ -74,8 +75,4 @@ def register_user(name, password, IMEI):
     #push this information in the database
     #also find a way to extract IMEI lmao, not sure if backend can extract IMEI or frontend
     return True, "Created a new user"
-
-
-
-    
 """
