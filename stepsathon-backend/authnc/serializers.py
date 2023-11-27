@@ -8,11 +8,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         ('F', 'Female'),
         ('O', 'Other'),
     )
-    gender = serializers.ChoiceField(choices=GENDER_CHOICES)
+    # gender = serializers.ChoiceField(choices=GENDER_CHOICES)
 
     class Meta:
         model = CustomUser
-        fields = ('id', 'name', 'age', 'gender', 'email', 'password')
+        fields = ('email', 'password')
 
     def create(self, validated_data):
         user = CustomUser.objects.create_user(**validated_data)
@@ -22,5 +22,5 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'name', 'age', 'gender', 'email')
+        fields = ('email')
 
