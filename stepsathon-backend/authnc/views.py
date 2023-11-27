@@ -1,38 +1,55 @@
-from django.contrib.auth import authenticate
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.authtoken.models import Token
+""" Module for login and signup views. """""
+from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-from rest_framework.status import (
-    HTTP_400_BAD_REQUEST,
-    HTTP_404_NOT_FOUND,
-    HTTP_200_OK
-)
-from rest_framework.response import Response
-from rest_framework import generics
+from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import RegisterSerializer, UserSerializer
 
-from authnc.serializers import RegisterSerializer, LoginSerializer, MiniUserSerializer
-from authnc.models import CustomUser
+@api_view(['POST', 'GET'])
+@permission_classes([AllowAny])
+def signup(request):
+    """ Signup view"""
+    if request.method == 'GET':
+        registration_serializer = RegisterSerializer()
+        return Response(
+            registration_serializer.data,
+   
+        )
+    if request.method == 'POST':
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            refresh = RefreshToken.for_user(user)
+            data = {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-@csrf_exempt
-@api_view(["POST"])
-@permission_classes((AllowAny,))
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def login(request):
-    serializer = LoginSerializer(data=request.data, context={'request': request})
-    if serializer.is_valid():
-        user = serializer.validated_data['user']
-        token, _ = Token.objects.get_or_create(user=user)
-        data = {'user_data': MiniUserSerializer(user).data, 
-                'Token': token}
-        return Response(data=data, status=HTTP_200_OK)
-    return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+    """ Login view"""
+    if request.method == 'POST':
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        user = authenticate(request, email=email, password=password)
+
+        if user is not None:
+            refresh = RefreshToken.for_user(user)
+            data = {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+    
 
 
-
-@api_view(["POST",])
-class RegisterView(generics.CreateAPIView):
-    queryset = CustomUser.objects.all()
-    permission_classes = (AllowAny,)
-    serializer_class = RegisterSerializer
+# views.py
 

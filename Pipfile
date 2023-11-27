@@ -9,6 +9,7 @@ django-rest-framework = "*"
 fernet = "*"
 cryptography = "*"
 pillow = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 
